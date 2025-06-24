@@ -1,26 +1,99 @@
+# Dependabot Configuration for Automated Dependency Updates
+# This file automatically monitors and updates dependencies to keep the project secure and up-to-date
+# 
+# Branch Naming Convention:
+# - upstream: Points to openwebui-pruned (the cleaned template branch)
+# - main: Production-ready code (default branch)
+# - dev: Development/experimental work
+# - openwebui-pruned: Cleaned template (has original open-webui as its upstream)
+
 version: 2
+
 updates:
+  # Python Dependencies (using uv package manager)
+  # Monitors the root directory for uv.lock file changes
   - package-ecosystem: uv
     directory: '/'
     schedule:
-      interval: monthly
-    target-branch: 'dev'
+      interval: monthly  # Check for updates monthly
+      # Alternative schedules (commented out):
+      # interval: weekly    # More frequent updates
+      # interval: daily     # Daily updates (not recommended for production)
+    target-branch: 'dev'   # Create PRs against dev branch for review
+    # Alternative target branches (commented out):
+    # target-branch: 'main'  # Direct to main (less safe)
+    # target-branch: 'upstream'  # Against upstream (template updates)
 
+  # Python Backend Dependencies (using pip)
+  # Monitors backend/requirements.txt for Python package updates
   - package-ecosystem: pip
     directory: '/backend'
     schedule:
       interval: monthly
+      # Alternative: weekly for critical security updates
+      # interval: weekly
     target-branch: 'dev'
+    # Additional pip configuration options (commented out):
+    # reviewers:
+    #   - "username1"
+    #   - "username2"
+    # assignees:
+    #   - "username1"
+    # open-pull-requests-limit: 10
+    # versioning-strategy: auto
 
+  # Node.js Frontend Dependencies (using npm)
+  # Monitors package.json and package-lock.json for JavaScript package updates
   - package-ecosystem: npm
     directory: '/'
     schedule:
       interval: monthly
     target-branch: 'dev'
+    # Alternative npm configurations (commented out):
+    # ignore:
+    #   - dependency-name: "typescript"  # Ignore specific packages
+    #   - dependency-name: "eslint"
+    # commit-message:
+    #   prefix: "npm"
+    #   include: "scope"
 
+  # GitHub Actions Dependencies
+  # Monitors .github/workflows/*.yml files for GitHub Actions updates
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
-      # Check for updates to GitHub Actions every week
       interval: monthly
+      # More frequent for security-critical GitHub Actions
+      # interval: weekly
     target-branch: 'dev'
+    # Alternative GitHub Actions configurations (commented out):
+    # reviewers:
+    #   - "security-team"
+    # assignees:
+    #   - "devops-team"
+    # commit-message:
+    #   prefix: "ci"
+    #   include: "scope"
+
+  # Additional package ecosystems (commented out - uncomment if needed):
+  
+  # # Docker Dependencies (monitors Dockerfile base images)
+  # - package-ecosystem: docker
+  #   directory: '/'
+  #   schedule:
+  #     interval: monthly
+  #   target-branch: 'dev'
+  
+  # # Terraform Dependencies (if using Terraform for infrastructure)
+  # - package-ecosystem: terraform
+  #   directory: '/'
+  #   schedule:
+  #     interval: monthly
+  #   target-branch: 'dev'
+  
+  # # GitHub Actions in subdirectories (if needed)
+  # - package-ecosystem: 'github-actions'
+  #   directory: '/.github/workflows'
+  #   schedule:
+  #     interval: monthly
+  #   target-branch: 'dev'

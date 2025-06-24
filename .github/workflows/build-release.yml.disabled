@@ -1,0 +1,185 @@
+# Automated Release Workflow
+# This workflow automatically creates GitHub releases when version changes are detected
+# 
+# Branch Naming Convention:
+# - upstream: Points to openwebui-pruned (the cleaned template branch)
+# - main: Production-ready code (default branch)
+# - dev: Development/experimental work
+# - openwebui-pruned: Cleaned template (has original open-webui as its upstream)
+#
+# Trigger: Pushes to main branch that include changes to package.json version
+# Output: GitHub release with changelog and Docker image build trigger
+
+name: Release
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to main branch (production releases)
+      # Alternative trigger branches (commented out):
+      # - dev     # Trigger on dev branch (for testing releases)
+      # - openwebui-pruned  # Trigger on template updates
+      # - upstream  # Trigger on upstream updates
+
+jobs:
+  release:
+    runs-on: ubuntu-latest  # Use latest Ubuntu runner
+    # Alternative runners (commented out):
+    # runs-on: ubuntu-22.04  # Specific Ubuntu version
+    # runs-on: windows-latest  # Windows runner (if needed)
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4  # Latest checkout action
+        # Alternative checkout options (commented out):
+        # uses: actions/checkout@v3  # Older version
+        # with:
+        #   fetch-depth: 0  # Fetch full history (for changelog generation)
+
+      # Step 2: Check for version changes in package.json
+      # This ensures we only create releases when the version actually changes
+      - name: Check for changes in package.json
+        run: |
+          git diff --cached --diff-filter=d package.json || {
+            echo "No changes to package.json"
+            exit 1
+          }
+        # Alternative change detection (commented out):
+        # run: |
+        #   # Check for changes in multiple files
+        #   git diff --cached --name-only | grep -E "(package.json|pyproject.toml)" || {
+        #     echo "No version changes detected"
+        #     exit 1
+        #   }
+
+      # Step 3: Extract version number from package.json
+      # This gets the semantic version for the release
+      - name: Get version number from package.json
+        id: get_version
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          echo "::set-output name=version::$VERSION"
+          echo "Release version: $VERSION"
+        # Alternative version sources (commented out):
+        # run: |
+        #   # Extract from pyproject.toml instead
+        #   VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+        #   echo "::set-output name=version::$VERSION"
+        # run: |
+        #   # Use git tag as version
+        #   VERSION=$(git describe --tags --abbrev=0)
+        #   echo "::set-output name=version::$VERSION"
+
+      # Step 4: Extract changelog content for release notes
+      # Reads the latest section from CHANGELOG.md
+      - name: Extract latest CHANGELOG entry
+        id: changelog
+        run: |
+          CHANGELOG_CONTENT=$(awk 'BEGIN {print_section=0;} /^## \[/ {if (print_section == 0) {print_section=1;} else {exit;}} print_section {print;}' CHANGELOG.md)
+          CHANGELOG_ESCAPED=$(echo "$CHANGELOG_CONTENT" | sed ':a;N;$!ba;s/\n/%0A/g')
+          echo "Extracted latest release notes from CHANGELOG.md:" 
+          echo -e "$CHANGELOG_CONTENT" 
+          echo "::set-output name=content::$CHANGELOG_ESCAPED"
+        # Alternative changelog generation (commented out):
+        # run: |
+        #   # Generate changelog from git commits
+        #   CHANGELOG_CONTENT=$(git log --oneline --since="1 month ago" --grep="^feat\|^fix\|^BREAKING")
+        #   CHANGELOG_ESCAPED=$(echo "$CHANGELOG_CONTENT" | sed ':a;N;$!ba;s/\n/%0A/g')
+        #   echo "::set-output name=content::$CHANGELOG_ESCAPED"
+
+      # Step 5: Create GitHub release with changelog
+      # Creates a proper GitHub release with tags and release notes
+      - name: Create GitHub release
+        uses: actions/github-script@v7  # Latest GitHub script action
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}  # Use default GitHub token
+          script: |
+            const changelog = `${{ steps.changelog.outputs.content }}`;
+            const release = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: `v${{ steps.get_version.outputs.version }}`,
+              name: `v${{ steps.get_version.outputs.version }}`,
+              body: changelog,
+            })
+            console.log(`Created release ${release.data.html_url}`)
+        # Alternative release configurations (commented out):
+        # with:
+        #   github-token: ${{ secrets.CUSTOM_TOKEN }}  # Use custom token
+        #   script: |
+        #     # Create draft release instead
+        #     const release = await github.rest.repos.createRelease({
+        #       owner: context.repo.owner,
+        #       repo: context.repo.repo,
+        #       tag_name: `v${{ steps.get_version.outputs.version }}`,
+        #       name: `v${{ steps.get_version.outputs.version }}`,
+        #       body: changelog,
+        #       draft: true,  # Create as draft
+        #       prerelease: false
+        #     })
+
+      # Step 6: Upload source code as release artifact
+      # Packages the source code with the release for distribution
+      - name: Upload package to GitHub release
+        uses: actions/upload-artifact@v4  # Latest upload action
+        with:
+          name: package
+          path: |
+            .
+            !.git  # Exclude git directory
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Alternative artifact configurations (commented out):
+        # with:
+        #   name: source-code
+        #   path: |
+        #     src/
+        #     backend/
+        #     package.json
+        #     pyproject.toml
+        #   retention-days: 30  # Keep artifacts for 30 days
+
+      # Step 7: Trigger Docker build workflow
+      # Automatically starts Docker image building for the new release
+      - name: Trigger Docker build workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'docker-build.yaml',
+              ref: 'v${{ steps.get_version.outputs.version }}',
+            })
+        # Alternative Docker build triggers (commented out):
+        # with:
+        #   script: |
+        #     # Trigger with specific inputs
+        #     github.rest.actions.createWorkflowDispatch({
+        #       owner: context.repo.owner,
+        #       repo: context.repo.repo,
+        #       workflow_id: 'docker-build.yaml',
+        #       ref: 'v${{ steps.get_version.outputs.version }}',
+        #       inputs: {
+        #         'build-cuda': 'true',
+        #         'platform': 'linux/amd64,linux/arm64'
+        #       }
+        #     })
+        # with:
+        #   script: |
+        #     # Trigger multiple workflows
+        #     await Promise.all([
+        #       github.rest.actions.createWorkflowDispatch({
+        #         owner: context.repo.owner,
+        #         repo: context.repo.repo,
+        #         workflow_id: 'docker-build.yaml',
+        #         ref: 'v${{ steps.get_version.outputs.version }}',
+        #       }),
+        #       github.rest.actions.createWorkflowDispatch({
+        #         owner: context.repo.owner,
+        #         repo: context.repo.repo,
+        #         workflow_id: 'test-workflow.yaml',
+        #         ref: 'v${{ steps.get_version.outputs.version }}',
+        #       })
+        #     ])
