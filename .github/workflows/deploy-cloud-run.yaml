@@ -15,12 +15,13 @@ name: Deploy to Google Cloud Run
 
 on:
   workflow_dispatch:  # Manual trigger option
-  push:
+  workflow_run:
+    workflows: ["Create and publish Docker images with specific build args"]
+    types:
+      - completed
     branches:
-      - apollo-main  # Deploy to production
-      - apollo-beta  # Deploy to beta
-    tags:
-      - v*  # Deploy on version tags
+      - apollo-main
+      - apollo-beta
 
 env:
   PROJECT_ID: apollo-463322
@@ -31,7 +32,7 @@ env:
 jobs:
   # Deploy to Beta Environment
   deploy-beta:
-    if: github.ref == 'refs/heads/apollo-beta'
+    if: github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/apollo-beta'
     runs-on: ubuntu-latest
     environment: beta
     
@@ -54,18 +55,18 @@ jobs:
 
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy apollo-beta ^
-            --image=${{ env.ARTIFACT_REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/apollo:apollo-beta ^
-            --region=${{ env.REGION }} ^
-            --platform=managed ^
-            --allow-unauthenticated ^
-            --port=8080 ^
-            --memory=4Gi ^
-            --cpu=2 ^
-            --max-instances=5 ^
-            --min-instances=0 ^
-            --set-env-vars="DATABASE_URL=${{ secrets.BETA_DATABASE_URL }},WEBUI_SECRET_KEY=${{ secrets.WEBUI_SECRET_KEY }}" ^
-            --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-beta-db ^
+          gcloud run deploy apollo-beta \
+            --image=${{ env.ARTIFACT_REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/apollo:apollo-beta \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --port=8080 \
+            --memory=4Gi \
+            --cpu=2 \
+            --max-instances=5 \
+            --min-instances=0 \
+            --set-env-vars="DATABASE_URL=${{ secrets.BETA_DATABASE_URL }},WEBUI_SECRET_KEY=${{ secrets.WEBUI_SECRET_KEY }}" \
+            --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-beta-db \
             --update-env-vars="DATABASE_POOL_SIZE=5,DATABASE_POOL_MAX_OVERFLOW=10,DATABASE_POOL_TIMEOUT=30,DATABASE_POOL_RECYCLE=3600"
 
       - name: Get service URL
@@ -93,7 +94,7 @@ jobs:
 
   # Deploy to Production Environment
   deploy-production:
-    if: github.ref == 'refs/heads/apollo-main'
+    if: github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/apollo-main'
     runs-on: ubuntu-latest
     environment: production
     
@@ -116,18 +117,18 @@ jobs:
 
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy apollo-production ^
-            --image=${{ env.ARTIFACT_REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/apollo:apollo-main ^
-            --region=${{ env.REGION }} ^
-            --platform=managed ^
-            --allow-unauthenticated ^
-            --port=8080 ^
-            --memory=4Gi ^
-            --cpu=2 ^
-            --max-instances=10 ^
-            --min-instances=1 ^
-            --set-env-vars="DATABASE_URL=${{ secrets.PROD_DATABASE_URL }},WEBUI_SECRET_KEY=${{ secrets.WEBUI_SECRET_KEY }}" ^
-            --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-production-db ^
+          gcloud run deploy apollo-production \
+            --image=${{ env.ARTIFACT_REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/apollo:apollo-main \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --port=8080 \
+            --memory=4Gi \
+            --cpu=2 \
+            --max-instances=10 \
+            --min-instances=1 \
+            --set-env-vars="DATABASE_URL=${{ secrets.PROD_DATABASE_URL }},WEBUI_SECRET_KEY=${{ secrets.WEBUI_SECRET_KEY }}" \
+            --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-production-db \
             --update-env-vars="DATABASE_POOL_SIZE=10,DATABASE_POOL_MAX_OVERFLOW=20,DATABASE_POOL_TIMEOUT=30,DATABASE_POOL_RECYCLE=3600"
 
       - name: Get service URL
