@@ -101,8 +101,19 @@ jobs:
             --cpu=2 \
             --max-instances=5 \
             --min-instances=0 \
+            --timeout=900 \
             --set-env-vars="DATABASE_URL=${{ secrets.BETA_DATABASE_URL }},WEBUI_SECRET_KEY=${{ secrets.WEBUI_SECRET_KEY }},DATABASE_POOL_SIZE=5,DATABASE_POOL_MAX_OVERFLOW=10,DATABASE_POOL_TIMEOUT=30,DATABASE_POOL_RECYCLE=3600" \
-            --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-beta-db
+            --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-beta-db \
+            --startup-cpu-boost \
+            --execution-environment=gen2 \
+            --update-env-vars="UVICORN_WORKERS=1" \
+            --update-env-vars="WEB_LOADER_ENGINE=requests" \
+            --update-env-vars="USE_OLLAMA_DOCKER=false" \
+            --update-env-vars="USE_CUDA_DOCKER=false" \
+            --startup-probe-path="/health" \
+            --startup-probe-timeout=600 \
+            --startup-probe-period=10 \
+            --startup-probe-failure-threshold=60
 
       - name: Get service URL
         id: service-url
@@ -143,8 +154,19 @@ jobs:
             --cpu=2 \
             --max-instances=10 \
             --min-instances=1 \
+            --timeout=900 \
             --set-env-vars="DATABASE_URL=${{ secrets.PROD_DATABASE_URL }},WEBUI_SECRET_KEY=${{ secrets.WEBUI_SECRET_KEY }},DATABASE_POOL_SIZE=10,DATABASE_POOL_MAX_OVERFLOW=20,DATABASE_POOL_TIMEOUT=30,DATABASE_POOL_RECYCLE=3600" \
-            --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-production-db
+            --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-production-db \
+            --startup-cpu-boost \
+            --execution-environment=gen2 \
+            --update-env-vars="UVICORN_WORKERS=1" \
+            --update-env-vars="WEB_LOADER_ENGINE=requests" \
+            --update-env-vars="USE_OLLAMA_DOCKER=false" \
+            --update-env-vars="USE_CUDA_DOCKER=false" \
+            --startup-probe-path="/health" \
+            --startup-probe-timeout=600 \
+            --startup-probe-period=10 \
+            --startup-probe-failure-threshold=60
 
       - name: Get service URL
         id: service-url
