@@ -15,13 +15,14 @@ name: Deploy to Google Cloud Run
 
 on:
   workflow_dispatch:  # Manual trigger option
+  push:
+    branches:
+      - apollo-beta
+      - apollo-main
   workflow_run:
     workflows: ["Create and publish Docker images with specific build args"]
     types:
       - completed
-    branches:
-      - apollo-main
-      - apollo-beta
 
 env:
   PROJECT_ID: apollo-463322
@@ -32,7 +33,9 @@ env:
 jobs:
   # Deploy to Beta Environment
   deploy-beta:
-    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'apollo-beta'
+    if: |
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'apollo-beta') ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/apollo-beta')
     runs-on: ubuntu-latest
     environment: beta
     
@@ -94,7 +97,9 @@ jobs:
 
   # Deploy to Production Environment
   deploy-production:
-    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'apollo-main'
+    if: |
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'apollo-main') ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/apollo-main')
     runs-on: ubuntu-latest
     environment: production
     
