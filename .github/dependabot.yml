@@ -3,8 +3,8 @@
 # 
 # Branch Naming Convention:
 # - upstream: Points to openwebui-pruned (the cleaned template branch)
-# - main: Production-ready code (default branch)
-# - dev: Development/experimental work
+# - apollo-main: Production-ready code (default branch)
+# - apollo-beta: Development/experimental work
 # - openwebui-pruned: Cleaned template (has original open-webui as its upstream)
 
 version: 2
@@ -19,9 +19,9 @@ updates:
       # Alternative schedules (commented out):
       # interval: weekly    # More frequent updates
       # interval: daily     # Daily updates (not recommended for production)
-    target-branch: 'dev'   # Create PRs against dev branch for review
+    target-branch: 'apollo-beta'   # Create PRs against apollo-beta branch for review
     # Alternative target branches (commented out):
-    # target-branch: 'main'  # Direct to main (less safe)
+    # target-branch: 'apollo-main'  # Direct to apollo-main (less safe)
     # target-branch: 'upstream'  # Against upstream (template updates)
 
   # Python Backend Dependencies (using pip)
@@ -32,7 +32,7 @@ updates:
       interval: monthly
       # Alternative: weekly for critical security updates
       # interval: weekly
-    target-branch: 'dev'
+    target-branch: 'apollo-beta'
     # Additional pip configuration options (commented out):
     # reviewers:
     #   - "username1"
@@ -48,7 +48,7 @@ updates:
     directory: '/'
     schedule:
       interval: monthly
-    target-branch: 'dev'
+    target-branch: 'apollo-beta'
     # Alternative npm configurations (commented out):
     # ignore:
     #   - dependency-name: "typescript"  # Ignore specific packages
@@ -65,7 +65,7 @@ updates:
       interval: monthly
       # More frequent for security-critical GitHub Actions
       # interval: weekly
-    target-branch: 'dev'
+    target-branch: 'apollo-beta'
     # Alternative GitHub Actions configurations (commented out):
     # reviewers:
     #   - "security-team"
@@ -82,18 +82,18 @@ updates:
   #   directory: '/'
   #   schedule:
   #     interval: monthly
-  #   target-branch: 'dev'
+  #   target-branch: 'apollo-beta'
   
   # # Terraform Dependencies (if using Terraform for infrastructure)
   # - package-ecosystem: terraform
   #   directory: '/'
   #   schedule:
   #     interval: monthly
-  #   target-branch: 'dev'
+  #   target-branch: 'apollo-beta'
   
   # # GitHub Actions in subdirectories (if needed)
   # - package-ecosystem: 'github-actions'
   #   directory: '/.github/workflows'
   #   schedule:
   #     interval: monthly
-  #   target-branch: 'dev'
+  #   target-branch: 'apollo-beta'

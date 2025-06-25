@@ -3,8 +3,8 @@
 # 
 # Branch Naming Convention:
 # - upstream: Points to openwebui-pruned (the cleaned template branch)
-# - main: Production-ready code (default branch)
-# - dev: Development/experimental work
+# - apollo-main: Production-ready code (default branch)
+# - apollo-beta: Development/experimental work
 # - openwebui-pruned: Cleaned template (has original open-webui as its upstream)
 #
 # Default Configuration: Builds only the main CPU image for efficiency
@@ -19,8 +19,8 @@ on:
   workflow_dispatch:  # Manual trigger option
   push:
     branches:
-      - main  # Trigger on main branch pushes (production)
-      - dev   # Trigger on dev branch pushes (development)
+      - apollo-main  # Trigger on apollo-main branch pushes (production)
+      - apollo-beta  # Trigger on apollo-beta branch pushes (development)
       # Alternative trigger branches (commented out):
       # - openwebui-pruned  # Trigger on template updates
       # - upstream  # Trigger on upstream updates
@@ -128,13 +128,13 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
           flavor: |
-            latest=${{ github.ref == 'refs/heads/main' }}
+            latest=${{ github.ref == 'refs/heads/apollo-main' }}
         # Alternative tagging strategies (commented out):
         # tags: |
         #   type=ref,event=branch
         #   type=ref,event=tag
-        #   type=raw,value=stable,enable=${{ github.ref == 'refs/heads/main' }}
-        #   type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+        #   type=raw,value=stable,enable=${{ github.ref == 'refs/heads/apollo-main' }}
+        #   type=raw,value=latest,enable=${{ github.ref == 'refs/heads/apollo-main' }}
 
       # Step 8: Setup Docker layer caching
       - name: Extract metadata for Docker cache
@@ -144,7 +144,7 @@ jobs:
           images: ${{ env.FULL_IMAGE_NAME }}
           tags: |
             type=ref,event=branch
-            ${{ github.ref_type == 'tag' && 'type=raw,value=main' || '' }}
+            ${{ github.ref_type == 'tag' && 'type=raw,value=apollo-main' || '' }}
           flavor: |
             prefix=cache-${{ matrix.platform }}-
             latest=false
@@ -251,9 +251,9 @@ jobs:
   #           type=sha,prefix=git-
   #           type=semver,pattern={{version}}
   #           type=semver,pattern={{major}}.{{minor}}
-  #           type=raw,enable=${{ github.ref == 'refs/heads/main' }},prefix=,suffix=,value=cuda
+  #           type=raw,enable=${{ github.ref == 'refs/heads/apollo-main' }},prefix=,suffix=,value=cuda
   #         flavor: |
-  #           latest=${{ github.ref == 'refs/heads/main' }}
+  #           latest=${{ github.ref == 'refs/heads/apollo-main' }}
   #           suffix=-cuda,onlatest=true
   #
   #     - name: Extract metadata for Docker cache
@@ -263,7 +263,7 @@ jobs:
   #         images: ${{ env.FULL_IMAGE_NAME }}
   #         tags: |
   #           type=ref,event=branch
-  #           ${{ github.ref_type == 'tag' && 'type=raw,value=main' || '' }}
+  #           ${{ github.ref_type == 'tag' && 'type=raw,value=apollo-main' || '' }}
   #         flavor: |
   #           prefix=cache-cuda-${{ matrix.platform }}-
   #           latest=false
@@ -353,9 +353,9 @@ jobs:
   #           type=sha,prefix=git-
   #           type=semver,pattern={{version}}
   #           type=semver,pattern={{major}}.{{minor}}
-  #           type=raw,enable=${{ github.ref == 'refs/heads/main' }},prefix=,suffix=,value=cuda126
+  #           type=raw,enable=${{ github.ref == 'refs/heads/apollo-main' }},prefix=,suffix=,value=cuda126
   #         flavor: |
-  #           latest=${{ github.ref == 'refs/heads/main' }}
+  #           latest=${{ github.ref == 'refs/heads/apollo-main' }}
   #           suffix=-cuda126,onlatest=true
   #
   #     - name: Extract metadata for Docker cache
@@ -365,7 +365,7 @@ jobs:
   #         images: ${{ env.FULL_IMAGE_NAME }}
   #         tags: |
   #           type=ref,event=branch
-  #           ${{ github.ref_type == 'tag' && 'type=raw,value=main' || '' }}
+  #           ${{ github.ref_type == 'tag' && 'type=raw,value=apollo-main' || '' }}
   #         flavor: |
   #           prefix=cache-cuda126-${{ matrix.platform }}-
   #           latest=false
@@ -456,9 +456,9 @@ jobs:
   #           type=sha,prefix=git-
   #           type=semver,pattern={{version}}
   #           type=semver,pattern={{major}}.{{minor}}
-  #           type=raw,enable=${{ github.ref == 'refs/heads/main' }},prefix=,suffix=,value=ollama
+  #           type=raw,enable=${{ github.ref == 'refs/heads/apollo-main' }},prefix=,suffix=,value=ollama
   #         flavor: |
-  #           latest=${{ github.ref == 'refs/heads/main' }}
+  #           latest=${{ github.ref == 'refs/heads/apollo-main' }}
   #           suffix=-ollama,onlatest=true
   #
   #     - name: Extract metadata for Docker cache
@@ -468,7 +468,7 @@ jobs:
   #         images: ${{ env.FULL_IMAGE_NAME }}
   #         tags: |
   #           type=ref,event=branch
-  #           ${{ github.ref_type == 'tag' && 'type=raw,value=main' || '' }}
+  #           ${{ github.ref_type == 'tag' && 'type=raw,value=apollo-main' || '' }}
   #         flavor: |
   #           prefix=cache-ollama-${{ matrix.platform }}-
   #           latest=false
@@ -546,7 +546,7 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
           flavor: |
-            latest=${{ github.ref == 'refs/heads/main' }}
+            latest=${{ github.ref == 'refs/heads/apollo-main' }}
 
       - name: Create manifest list and push
         working-directory: /tmp/digests
@@ -598,9 +598,9 @@ jobs:
   #           type=sha,prefix=git-
   #           type=semver,pattern={{version}}
   #           type=semver,pattern={{major}}.{{minor}}
-  #           type=raw,enable=${{ github.ref == 'refs/heads/main' }},prefix=,suffix=,value=cuda
+  #           type=raw,enable=${{ github.ref == 'refs/heads/apollo-main' }},prefix=,suffix=,value=cuda
   #         flavor: |
-  #           latest=${{ github.ref == 'refs/heads/main' }}
+  #           latest=${{ github.ref == 'refs/heads/apollo-main' }}
   #           suffix=-cuda,onlatest=true
   #
   #     - name: Create manifest list and push
@@ -653,9 +653,9 @@ jobs:
   #           type=sha,prefix=git-
   #           type=semver,pattern={{version}}
   #           type=semver,pattern={{major}}.{{minor}}
-  #           type=raw,enable=${{ github.ref == 'refs/heads/main' }},prefix=,suffix=,value=cuda126
+  #           type=raw,enable=${{ github.ref == 'refs/heads/apollo-main' }},prefix=,suffix=,value=cuda126
   #         flavor: |
-  #           latest=${{ github.ref == 'refs/heads/main' }}
+  #           latest=${{ github.ref == 'refs/heads/apollo-main' }}
   #           suffix=-cuda126,onlatest=true
   #
   #     - name: Create manifest list and push
@@ -708,9 +708,9 @@ jobs:
   #           type=sha,prefix=git-
   #           type=semver,pattern={{version}}
   #           type=semver,pattern={{major}}.{{minor}}
-  #           type=raw,enable=${{ github.ref == 'refs/heads/main' }},prefix=,suffix=,value=ollama
+  #           type=raw,enable=${{ github.ref == 'refs/heads/apollo-main' }},prefix=,suffix=,value=ollama
   #         flavor: |
-  #           latest=${{ github.ref == 'refs/heads/main' }}
+  #           latest=${{ github.ref == 'refs/heads/apollo-main' }}
   #           suffix=-ollama,onlatest=true
   #
   #     - name: Create manifest list and push
