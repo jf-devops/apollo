@@ -147,27 +147,8 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
           flavor: |
             latest=${{ github.ref == 'refs/heads/apollo-main' }}
-        # Alternative tagging strategies (commented out):
-        # tags: |
-        #   type=ref,event=branch
-        #   type=ref,event=tag
-        #   type=raw,value=stable,enable=${{ github.ref == 'refs/heads/apollo-main' }}
-        #   type=raw,value=latest,enable=${{ github.ref == 'refs/heads/apollo-main' }}
 
-      # Step 9: Setup Docker layer caching
-      - name: Extract metadata for Docker cache
-        id: cache-meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.GITHUB_IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            ${{ github.ref_type == 'tag' && 'type=raw,value=apollo-main' || '' }}
-          flavor: |
-            prefix=cache-${{ matrix.platform }}-
-            latest=false
-
-      # Step 10: Build and push Docker image to both registries
+      # Step 9: Build and push Docker image to both registries
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         id: build
@@ -177,8 +158,8 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.GITHUB_IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=registry,ref=${{ steps.cache-meta.outputs.tags }}
-          cache-to: type=registry,ref=${{ steps.cache-meta.outputs.tags }},mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           build-args: |
             BUILD_HASH=${{ github.sha }}
         # Alternative build configurations (commented out):
@@ -192,14 +173,14 @@ jobs:
         #     USE_CUDA=true  # Enable GPU support
         #     USE_OLLAMA=true  # Enable Ollama integration
 
-      # Step 11: Export image digest for manifest creation
+      # Step 10: Export image digest for manifest creation
       - name: Export digest
         run: |
           mkdir -p /tmp/digests
           digest="${{ steps.build.outputs.digest }}"
           touch "/tmp/digests/${digest#sha256:}"
 
-      # Step 12: Upload digest as artifact
+      # Step 11: Upload digest as artifact
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
@@ -548,7 +529,7 @@ jobs:
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ env.GITHUB_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
