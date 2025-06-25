@@ -14,7 +14,7 @@
 name: Deploy to Google Cloud Run
 
 on:
-  workflow_dispatch:  # Manual trigger option
+  workflow_dispatch:
   push:
     branches:
       - apollo-beta
@@ -31,7 +31,6 @@ env:
   REPOSITORY_NAME: apollo
 
 jobs:
-  # Deploy to Beta Environment
   deploy-beta:
     if: |
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'apollo-beta') ||
@@ -68,34 +67,14 @@ jobs:
             --cpu=2 \
             --max-instances=5 \
             --min-instances=0 \
-            --set-env-vars="DATABASE_URL=${{ secrets.BETA_DATABASE_URL }},WEBUI_SECRET_KEY=${{ secrets.WEBUI_SECRET_KEY }}" \
-            --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-beta-db \
-            --update-env-vars="DATABASE_POOL_SIZE=5,DATABASE_POOL_MAX_OVERFLOW=10,DATABASE_POOL_TIMEOUT=30,DATABASE_POOL_RECYCLE=3600"
+            --set-env-vars="DATABASE_URL=${{ secrets.BETA_DATABASE_URL }},WEBUI_SECRET_KEY=${{ secrets.WEBUI_SECRET_KEY }},DATABASE_POOL_SIZE=5,DATABASE_POOL_MAX_OVERFLOW=10,DATABASE_POOL_TIMEOUT=30,DATABASE_POOL_RECYCLE=3600" \
+            --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-beta-db
 
       - name: Get service URL
         id: service-url
         run: |
           echo "url=$(gcloud run services describe apollo-beta --region=${{ env.REGION }} --format='value(status.url)')" >> $GITHUB_OUTPUT
 
-      - name: Comment on PR
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `🚀 **Beta Deployment Complete!**
-              
-              Your changes have been deployed to the beta environment.
-              
-              **Service URL**: ${{ steps.service-url.outputs.url }}
-              
-              The deployment is now live and ready for testing.`
-            })
-
-  # Deploy to Production Environment
   deploy-production:
     if: |
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'apollo-main') ||
@@ -132,9 +111,8 @@ jobs:
             --cpu=2 \
             --max-instances=10 \
             --min-instances=1 \
-            --set-env-vars="DATABASE_URL=${{ secrets.PROD_DATABASE_URL }},WEBUI_SECRET_KEY=${{ secrets.WEBUI_SECRET_KEY }}" \
-            --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-production-db \
-            --update-env-vars="DATABASE_POOL_SIZE=10,DATABASE_POOL_MAX_OVERFLOW=20,DATABASE_POOL_TIMEOUT=30,DATABASE_POOL_RECYCLE=3600"
+            --set-env-vars="DATABASE_URL=${{ secrets.PROD_DATABASE_URL }},WEBUI_SECRET_KEY=${{ secrets.WEBUI_SECRET_KEY }},DATABASE_POOL_SIZE=10,DATABASE_POOL_MAX_OVERFLOW=20,DATABASE_POOL_TIMEOUT=30,DATABASE_POOL_RECYCLE=3600" \
+            --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-production-db
 
       - name: Get service URL
         id: service-url
