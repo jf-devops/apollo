@@ -110,7 +110,7 @@ jobs:
             --update-env-vars="WEB_LOADER_ENGINE=requests" \
             --update-env-vars="USE_OLLAMA_DOCKER=false" \
             --update-env-vars="USE_CUDA_DOCKER=false" \
-            --startup-probe="path=/health,timeout=600,period=10,failure-threshold=60"
+            --startup-probe="timeoutSeconds=600,periodSeconds=10,failureThreshold=60,httpGet.path=/health,httpGet.port=8080"
 
       - name: Get service URL
         id: service-url
@@ -160,7 +160,7 @@ jobs:
             --update-env-vars="WEB_LOADER_ENGINE=requests" \
             --update-env-vars="USE_OLLAMA_DOCKER=false" \
             --update-env-vars="USE_CUDA_DOCKER=false" \
-            --startup-probe="path=/health,timeout=600,period=10,failure-threshold=60"
+            --startup-probe="timeoutSeconds=600,periodSeconds=10,failureThreshold=60,httpGet.path=/health,httpGet.port=8080"
 
       - name: Get service URL
         id: service-url
