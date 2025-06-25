@@ -42,4 +42,8 @@ For complete license details, see the [LICENSE](LICENSE) file.
 
 ---
 
-*Apollo is maintained by Just-Forward Consulting GmbH. Original Open WebUI project created by Timothy Jaeryang Baek and the Open WebUI community.* 
+*Apollo is maintained by Just-Forward Consulting GmbH. Original Open WebUI project created by Timothy Jaeryang Baek and the Open WebUI community.*
+
+Apollo is an internal tool based on Open WebUI.
+
+<!-- Test deployment trigger --> 
