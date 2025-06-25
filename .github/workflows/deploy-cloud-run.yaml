@@ -32,7 +32,7 @@ env:
 jobs:
   # Deploy to Beta Environment
   deploy-beta:
-    if: github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/apollo-beta'
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'apollo-beta'
     runs-on: ubuntu-latest
     environment: beta
     
@@ -94,7 +94,7 @@ jobs:
 
   # Deploy to Production Environment
   deploy-production:
-    if: github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/apollo-main'
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'apollo-main'
     runs-on: ubuntu-latest
     environment: production
     
