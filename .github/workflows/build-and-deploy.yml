@@ -113,7 +113,7 @@ jobs:
               WEB_LOADER_ENGINE=requests,\
               USE_OLLAMA_DOCKER=false,\
               USE_CUDA_DOCKER=false,\
-              BYPASS_MODEL_ACCESS_CONTROL=TRUE\
+              BYPASS_MODEL_ACCESS_CONTROL=true\
             " \
             --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-beta-db \
             --cpu-boost \
@@ -171,7 +171,7 @@ jobs:
               WEB_LOADER_ENGINE=requests,\
               USE_OLLAMA_DOCKER=false,\
               USE_CUDA_DOCKER=false,\
-              BYPASS_MODEL_ACCESS_CONTROL=TRUE\
+              BYPASS_MODEL_ACCESS_CONTROL=true\
             " \
             --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-production-db \
             --cpu-boost \
