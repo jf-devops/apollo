@@ -19,7 +19,7 @@ from sqlalchemy import text
 from typing import Optional
 from aiocache import cached
 import aiohttp
-import anyio.to_thread
+# import anyio.to_thread  # Removed - anyio broken with Python 3.11
 import requests
 from redis import Redis
 
@@ -528,8 +528,8 @@ async def lifespan(app: FastAPI):
         )
 
     if THREAD_POOL_SIZE and THREAD_POOL_SIZE > 0:
-        limiter = anyio.to_thread.current_default_thread_limiter()
-        limiter.total_tokens = THREAD_POOL_SIZE
+        log.warning("Thread pool management disabled due to anyio compatibility issues with Python 3.11")
+        # TODO: Implement alternative thread pool management if needed
 
     asyncio.create_task(periodic_usage_pool_cleanup())
 
