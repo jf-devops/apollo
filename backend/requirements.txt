@@ -95,7 +95,7 @@ PyJWT[crypto]==2.10.1
 authlib==1.4.1
 
 black==25.1.0
-langfuse==2.44.0
+# langfuse==2.44.0  # Removed - not used in codebase and conflicts with anyio 3.7.1
 youtube-transcript-api==1.1.0
 pytube==15.0.0
 
