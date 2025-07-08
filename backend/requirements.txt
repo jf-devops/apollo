@@ -2,7 +2,7 @@ fastapi==0.115.7
 uvicorn[standard]==0.34.2
 pydantic==2.10.6
 python-multipart==0.0.20
-anyio<4  # Pinned to 3.x for Python 3.11 compatibility
+anyio<4  # Pinned to 3.x because FastAPI/Starlette require pre-4.0 anyio due to ExceptionGroup import that was removed in anyio 4.0+. This may change when we upgrade to newer FastAPI/Starlette versions that use newer anyio.
 
 python-socketio==5.13.0
 python-jose==3.4.0
