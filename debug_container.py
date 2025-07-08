@@ -16,7 +16,13 @@ def debug_anyio_installation():
     # Check if anyio is installed
     try:
         import anyio
-        print(f"anyio version: {anyio.__version__}")
+        # Check for version using importlib.metadata (more reliable)
+        try:
+            import importlib.metadata
+            version = importlib.metadata.version('anyio')
+            print(f"anyio version: {version}")
+        except Exception:
+            print(f"anyio version: unknown (no __version__ attribute)")
         print(f"anyio location: {anyio.__file__}")
     except ImportError as e:
         print(f"anyio import error: {e}")

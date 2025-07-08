@@ -134,7 +134,6 @@ RUN if [ "$USE_OLLAMA" = "true" ]; then \
 
 # install python dependencies
 COPY --chown=$UID:$GID ./backend/requirements.txt ./requirements.txt
-COPY --chown=$UID:$GID ./uv.lock ./uv.lock
 
 RUN pip3 install --no-cache-dir uv && \
     if [ "$USE_CUDA" = "true" ]; then \
