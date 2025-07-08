@@ -105,7 +105,7 @@ jobs:
             --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-beta-db \
             --cpu-boost \
             --execution-environment=gen2 \
-            --startup-probe="timeoutSeconds=30,periodSeconds=60,failureThreshold=10,httpGet.path=/health,httpGet.port=8080"
+            --startup-probe="timeoutSeconds=30,periodSeconds=60,failureThreshold=5,httpGet.path=/health,httpGet.port=8080"
 
       - name: Get service URL
         id: service-url
@@ -151,7 +151,7 @@ jobs:
             --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:apollo-production-db \
             --cpu-boost \
             --execution-environment=gen2 \
-            --startup-probe="timeoutSeconds=30,periodSeconds=60,failureThreshold=10,httpGet.path=/health,httpGet.port=8080"
+            --startup-probe="timeoutSeconds=30,periodSeconds=60,failureThreshold=5,httpGet.path=/health,httpGet.port=8080"
 
       - name: Get service URL
         id: service-url
