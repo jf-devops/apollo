@@ -165,10 +165,6 @@ COPY --chown=$UID:$GID --from=build /app/package.json /app/package.json
 
 # copy backend files
 COPY --chown=$UID:$GID ./backend .
-COPY --chown=$UID:$GID ./debug_container.py ./debug_container.py
-
-# Run debug script to understand anyio installation
-RUN python debug_container.py
 
 
 
